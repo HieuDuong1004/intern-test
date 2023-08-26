@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Liệt kê và sắp xếp các kí tự</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+        }
+        h1 {
+          text-align: center;
+        }
+        #container {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-top: 20px;
+        }
+        th,
+        td {
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+        }
+        th {
+          background-color: #f2f2f2;
+        }
+        td {
+          vertical-align: middle;
+        }
+        button {
+          background-color: #4caf50;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          cursor: pointer;
+          margin-right: 10px;
+        }
+        button:hover {
+          background-color: #45a049;
+        }
+        #pagination {
+          text-align: center;
+          margin-top: 20px;
+        }
+        .pageNumber {
+          background-color: #15141460;
+          border: 1px solid #ddd;
+          padding: 5px 10px;
+          margin: 0 5px;
+          cursor: pointer;
+        }
+        .pageNumber.active {
+          background-color: #4caf50;
+          color: white;
+        }
+      </style>
+  </head>
+  <body>
+    <h1>Liệt kê và sắp xếp các kí tự</h1>
+
+    <div id="container">
+      <button id="generate">Random phần tử</button>
+      <button id="bubbleSort">Bubble Sort</button>
+      <button id="selectionSort">Selection Sort</button>
+      <button id="insertionSort">Insertion Sort</button>
+      <button id="quickSort">Quick Sort</button>
+      <button id="mergeSort">Merge Sort</button>
+
+      <div id="result"></div>
+      <div id="pagination"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let array = [];
+        let currentPage = 1;
+
+        const generateButton = document.getElementById("generate");
+        const bubbleSortButton = document.getElementById("bubbleSort");
+        const selectionSortButton = document.getElementById("selectionSort");
+        const insertionSortButton = document.getElementById("insertionSort");
+        const quickSortButton = document.getElementById("quickSort");
+        const mergeSortButton = document.getElementById("mergeSort");
+        const paginationDiv = document.getElementById("pagination");
+
+        const generateRandomString = () => {
+          const length = Math.floor(Math.random() * 5) + 1;
+          const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          return Array.from({ length }, () => letters.charAt(Math.floor(Math.random() * letters.length))).join("");
+        };
+
+        const generateArray = () => Array.from({ length: 1000 }, generateRandomString);
+
+        const displayArrayInTable = (arr, page) => {
+          const itemsPerPage = 100;
+          const startIndex = (page - 1) * itemsPerPage;
+          const endIndex = Math.min(startIndex + itemsPerPage, arr.length);
+          const resultDiv = document.getElementById("result");
+
+          const rowsHTML = Array.from({ length: 10 }, (_, row) => {
+            return `<tr>${Array.from({ length: 10 }, (_, col) => {
+              const index = startIndex + row + col * 10;
+              return index < endIndex ? `<td>${arr[index]}</td>` : "";
+            }).join("")}</tr>`;
+          }).join("");
+
+          const tableHTML = `<table>${rowsHTML}</table>`;
+          resultDiv.innerHTML = tableHTML;
+        };
+
+        const bubbleSort = (arr) => {
+          const startTime = performance.now();
+          for (let i = 0; i < arr.length - 1; i++) {
+            for (let j = 0; j < arr.length - i - 1; j++) {
+              if (arr[j] > arr[j + 1]) {
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+              }
+            }
+          }
+          const endTime = performance.now();
+          return endTime - startTime;
+        };
+
+        const selectionSort = (arr) => {
+          const startTime = performance.now();
+          for (let i = 0; i < arr.length - 1; i++) {
+            let minIndex = i;
+            for (let j = i + 1; j < arr.length; j++) {
+              if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+              }
+            }
+            [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+          }
+          const endTime = performance.now();
+          return endTime - startTime;
+        };
+
+        const insertionSort = (arr) => {
+          const startTime = performance.now();
+          for (let i = 1; i < arr.length; i++) {
+            const currentElement = arr[i];
+            let j = i - 1;
+            while (j >= 0 && arr[j] > currentElement) {
+              arr[j + 1] = arr[j];
+              j--;
+            }
+            arr[j + 1] = currentElement;
+          }
+          const endTime = performance.now();
+          return endTime - startTime;
+        };
+
+        const quickSort = (arr, left = 0, right = arr.length - 1) => {
+          if (left < right) {
+            const pivotIndex = partition(arr, left, right);
+            quickSort(arr, left, pivotIndex - 1);
+            quickSort(arr, pivotIndex + 1, right);
+          }
+        };
+
+        const mergeSort = (arr) => {
+          if (arr.length <= 1) {
+            return arr;
+          }
+          const middle = Math.floor(arr.length / 2);
+          const left = arr.slice(0, middle);
+          const right = arr.slice(middle);
+          return merge(mergeSort(left), mergeSort(right));
+        };
+
+        const merge = (left, right) => {
+          const result = [];
+          let leftIndex = 0;
+          let rightIndex = 0;
+          while (leftIndex < left.length && rightIndex < right.length) {
+            if (left[leftIndex] < right[rightIndex]) {
+              result.push(left[leftIndex]);
+              leftIndex++;
+            } else {
+              result.push(right[rightIndex]);
+              rightIndex++;
+            }
+          }
+          return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
+        };
+
+        const partition = (arr, left, right) => {
+          const pivot = arr[right];
+          let i = left - 1;
+          for (let j = left; j < right; j++) {
+            if (arr[j] <= pivot) {
+              [arr[i + 1], arr[j]] = [arr[j], arr[i + 1]];
+              i++;
+            }
+          }
+          [arr[i + 1], arr[right]] = [arr[right], arr[i + 1]];
+          return i + 1;
+        };
+
+        generateButton.addEventListener("click", () => {
+          array = generateArray();
+          currentPage = 1;
+          displayArrayInTable(array, currentPage);
+          updatePagination(array, currentPage);
+        });
+
+        bubbleSortButton.addEventListener("click", () => {
+          const timeTaken = bubbleSort(array);
+          displayArrayInTable(array, currentPage);
+          alert("Bubble Sort took " + timeTaken + " milliseconds.");
+        });
+
+        selectionSortButton.addEventListener("click", () => {
+          const timeTaken = selectionSort(array);
+          displayArrayInTable(array, currentPage);
+          alert("Selection Sort took " + timeTaken + " milliseconds.");
+        });
+
+        insertionSortButton.addEventListener("click", () => {
+          const timeTaken = insertionSort(array);
+          displayArrayInTable(array, currentPage);
+          alert("Insertion Sort took " + timeTaken + " milliseconds.");
+        });
+
+        quickSortButton.addEventListener("click", () => {
+          const startTime = performance.now();
+          quickSort(array);
+          const endTime = performance.now();
+          const timeTaken = endTime - startTime;
+          displayArrayInTable(array, currentPage);
+          alert("Quick Sort took " + timeTaken + " milliseconds.");
+        });
+
+        mergeSortButton.addEventListener("click", () => {
+          const startTime = performance.now();
+          array = mergeSort(array);
+          const endTime = performance.now();
+          const timeTaken = endTime - startTime;
+          displayArrayInTable(array, currentPage);
+          alert("Merge Sort took " + timeTaken + " milliseconds.");
+        });
+
+        const updatePagination = (arr, currentPage) => {
+          const itemsPerPage = 100;
+          const totalPages = Math.ceil(arr.length / itemsPerPage);
+
+          const paginationHTML = buildPaginationHTML(totalPages, currentPage);
+          paginationDiv.innerHTML = paginationHTML;
+
+          const pageNumberButtons = document.querySelectorAll(".pageNumber");
+          pageNumberButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              currentPage = parseInt(button.textContent);
+              displayArrayInTable(array, currentPage);
+              updatePagination(array, currentPage);
+            });
+          });
+
+          const prevPageButton = document.getElementById("prevPage");
+          prevPageButton.addEventListener("click", () => {
+            if (currentPage > 1) {
+              currentPage--;
+              displayArrayInTable(array, currentPage);
+              updatePagination(array, currentPage);
+            }
+          });
+
+          const nextPageButton = document.getElementById("nextPage");
+          nextPageButton.addEventListener("click", () => {
+            if (currentPage < totalPages) {
+              currentPage++;
+              displayArrayInTable(array, currentPage);
+              updatePagination(array, currentPage);
+            }
+          });
+        };
+
+        const buildPaginationHTML = (totalPages, currentPage) => {
+          let paginationHTML = "";
+          if (totalPages > 1) {
+            paginationHTML += '<button id="prevPage">Previous Page</button>';
+
+            if (currentPage > 2) {
+              paginationHTML += '<button class="pageNumber">' + 1 + "</button>";
+              if (currentPage > 3) {
+                paginationHTML += '<span class="dots">...</span>';
+              }
+            }
+
+            for (let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) {
+              paginationHTML += i === currentPage ? `<button class="pageNumber active">${i}</button>` : `<button class="pageNumber">${i}</button>`;
+            }
+
+            if (currentPage < totalPages - 2) {
+              if (currentPage < totalPages - 3) {
+                paginationHTML += '<span class="dots">...</span>';
+              }
+              paginationHTML += `<button class="pageNumber">${totalPages}</button>`;
+            }
+
+            paginationHTML += '<button id="nextPage">Next Page</button>';
+          }
+
+          return paginationHTML;
+        };
+      });
+    </script>
+  </body>
+</html>
